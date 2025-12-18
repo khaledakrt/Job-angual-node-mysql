@@ -1,0 +1,76 @@
+<div class="profile-container">
+
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="avatar">
+      <img [src]="profile.avatar || 'assets/default-avatar.png'" alt="Avatar">
+    </div>
+    <div class="header-info">
+      <h1>{{ profile.name }}</h1>
+      <span>{{ profile.role }}</span>
+      
+    </div>
+  </div>
+
+  <!-- Main Cards -->
+  <div class="profile-main">
+
+    <!-- Infos personnelles -->
+    <div class="card">
+      <h2>Infos personnelles</h2>
+      <div *ngIf="!editPersonal">
+        <p><strong>Email:</strong> {{ profile.email }}</p>
+        <p><strong>Téléphone:</strong> {{ profile.phone }}</p>
+        <p><strong>Adresse:</strong> {{ profile.address }}</p>
+        <div class="actions">
+          <button class="btn-edit" (click)="editPersonal = true">Modifier</button>
+        </div>
+      </div>
+      <div *ngIf="editPersonal">
+        <p><strong>Email:</strong> <input [(ngModel)]="profile.email" type="email"></p>
+        <p><strong>Téléphone:</strong> <input [(ngModel)]="profile.phone" type="text"></p>
+        <p><strong>Adresse:</strong> <input [(ngModel)]="profile.address" type="text"></p>
+        <div class="actions">
+          <button class="btn-save" (click)="savePersonal()">Sauvegarder</button>
+          <button class="btn-cancel" (click)="editPersonal = false">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entreprise -->
+    <div class="card">
+      <h2>Entreprise</h2>
+      <div *ngIf="!editCompany">
+        <p><strong>Nom:</strong> {{ profile.company }}</p>
+        <p><strong>Description:</strong> {{ profile.description }}</p>
+        <p><strong>Site web:</strong> <a [href]="profile.website" target="_blank">{{ profile.website }}</a></p>
+        <div class="actions">
+          <button class="btn-edit" (click)="editCompany = true">Modifier</button>
+        </div>
+      </div>
+      <div *ngIf="editCompany">
+        <p><strong>Nom:</strong> <input [(ngModel)]="profile.company" type="text"></p>
+        <p><strong>Description:</strong> <textarea [(ngModel)]="profile.description"></textarea></p>
+        <p><strong>Site web:</strong> <input [(ngModel)]="profile.website" type="url"></p>
+        <div class="actions">
+          <button class="btn-save" (click)="saveCompany()">Sauvegarder</button>
+          <button class="btn-cancel" (click)="editCompany = false">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="card stats">
+      <h2>Statistiques</h2>
+      <div class="stat">
+        <span class="stat-number">{{ profile.jobsCount }}</span>
+        <span class="stat-label">Offres publiées</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ profile.applicationsCount }}</span>
+        <span class="stat-label">Candidatures reçues</span>
+      </div>
+    </div>
+
+  </div>
+</div>

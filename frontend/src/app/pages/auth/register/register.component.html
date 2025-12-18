@@ -1,0 +1,49 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <form [formGroup]="registerForm" (ngSubmit)="submit()"
+        class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Inscription</h2>
+
+    <input formControlName="name" placeholder="Nom"
+           class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <input formControlName="email" placeholder="Email" type="email"
+           class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <input formControlName="password" placeholder="Mot de passe" type="password"
+           class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <select formControlName="role"
+            class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="candidate">Candidat</option>
+      <option value="recruiter">Recruteur</option>
+    </select>
+
+    <!-- Champs pour candidate -->
+    <div *ngIf="registerForm.get('role')?.value === 'candidate'">
+      <input formControlName="phone" placeholder="Téléphone"
+             class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input formControlName="address" placeholder="Adresse"
+             class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <!-- Champs pour recruteur -->
+    <div *ngIf="registerForm.get('role')?.value === 'recruiter'">
+      <input formControlName="company" placeholder="Entreprise"
+             class="w-full p-2 mb-4 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <div *ngIf="errorMessage" class="text-red-500 mb-4 text-center">{{ errorMessage }}</div>
+
+    <button type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded font-semibold transition-colors">
+      S’inscrire
+    </button>
+
+    <p class="text-sm text-gray-500 mt-4 text-center">
+      Déjà un compte ? 
+      <a
+    routerLink="/login"
+    class="text-blue-500 hover:underline cursor-pointer">Connexion</a>
+    </p>
+  </form>
+</div>

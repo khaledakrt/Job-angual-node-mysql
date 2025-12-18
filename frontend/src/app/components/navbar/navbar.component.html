@@ -1,0 +1,30 @@
+<nav class="bg-white shadow-md px-4 py-3 flex justify-between items-center">
+  <a routerLink="/" class="text-xl font-bold text-blue-600">JobPortal</a>
+
+  <div class="hidden md:flex space-x-4 items-center">
+    <!-- VISITEUR -->
+    <ng-container *ngIf="!isLoggedIn">
+      <a routerLink="/" class="nav-link">Accueil</a>
+      <a routerLink="/jobs" class="nav-link">Offres d'emploi</a>
+      <a routerLink="/login" class="btn-login">Connexion</a>
+      <a routerLink="/register" class="btn-register">Inscription</a>
+    </ng-container>
+
+    <!-- CANDIDATE -->
+    <ng-container *ngIf="isLoggedIn && userRole === 'candidate'">
+      <a routerLink="/" class="nav-link">Accueil</a>
+      <a routerLink="/jobs" class="nav-link">Offres d'emploi</a>
+      <a routerLink="/candidate/profile" class="nav-link">Profil</a>
+      <button (click)="logout()" class="btn-logout">Déconnexion</button>
+    </ng-container>
+
+    <!-- RECRUITER -->
+    <ng-container *ngIf="isLoggedIn && userRole === 'recruiter'">
+      <a routerLink="/" class="nav-link">Accueil</a>
+      <a routerLink="/jobs" class="nav-link">Offres publiées</a>
+      <a routerLink="/recruiter/profile" class="nav-link">Profil</a>
+      <a routerLink="/recruiter/dashboard" class="nav-link">Dashboard</a>
+      <button (click)="logout()" class="btn-logout">Déconnexion</button>
+    </ng-container>
+  </div>
+</nav>

@@ -1,0 +1,126 @@
+<div class="dashboard" *ngIf="profile">
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>{{ profile.name }} — {{ profile.company }}</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">+ Créer une offre</button>
+  </div>
+
+  <!-- MODAL CREATE JOB -->
+  <div class="modal-overlay" *ngIf="showCreateForm">
+    <div class="modal">
+      <h2>Créer une nouvelle offre</h2>
+      <form (ngSubmit)="submitJob()">
+        <label>Titre</label>
+        <input type="text" [(ngModel)]="newJob.title" name="title" required />
+
+        <label>Description</label>
+        <textarea [(ngModel)]="newJob.description" name="description"></textarea>
+
+        <label>Localisation</label>
+        <input type="text" [(ngModel)]="newJob.location" name="location" />
+
+        <label>Salary</label>
+        <input type="text" [(ngModel)]="newJob.salary" name="salary" />
+
+        <label>Experience</label>
+        <input type="number" [(ngModel)]="newJob.experience" name="experience" />
+
+        <label>Type</label>
+        <select [(ngModel)]="newJob.type" name="type">
+          <option value="full-time">Full-time</option>
+          <option value="part-time">Part-time</option>
+          <option value="internship">Internship</option>
+          <option value="contract">Contract</option>
+        </select>
+
+        <label>Date d’expiration</label>
+        <input type="datetime-local" [(ngModel)]="newJob.expiryDate" name="expiryDate" />
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Créer</button>
+          <button type="button" class="link danger" (click)="cancelCreate()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ✅ MODAL EDIT JOB -->
+<div class="modal-overlay" *ngIf="showEditModal && editingJob">
+  <div class="modal">
+    <h2>Modifier l'offre</h2>
+    <label>Titre</label>
+    <input [(ngModel)]="editingJob.title" />
+    <label>Description</label>
+    <textarea [(ngModel)]="editingJob.description"></textarea>
+    <label>Localisation</label>
+    <input [(ngModel)]="editingJob.location" />
+    <label>Salaire</label>
+    <input [(ngModel)]="editingJob.salary" />
+    <label>Type</label>
+    <select [(ngModel)]="editingJob.type">
+      <option value="full-time">Full-time</option>
+      <option value="part-time">Part-time</option>
+      <option value="internship">Internship</option>
+      <option value="contract">Contract</option>
+    </select>
+    <label>Date d’expiration</label>
+    <input type="datetime-local" [(ngModel)]="editingJob.expiryDate" />
+    <div class="form-actions">
+      <button (click)="saveJob()">Sauvegarder</button>
+      <button (click)="cancelEdit()">Annuler</button>
+    </div>
+  </div>
+</div>
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span>Offres actives</span>
+      <strong>{{ profile.stats.activeJobs }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span>Total candidatures</span>
+      <strong>{{ profile.stats.applicationsReceived }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span>Offres publiées</span>
+      <strong>{{ profile.stats.jobsPublished }}</strong>
+    </div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="jobs-card">
+    <h2>Mes offres</h2>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Localisation</th>
+          <!-- <th>Candidatures</th> -->
+          <th>Créée le</th>
+          <th>Statut</th>
+          <th>Expiration</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of profile.jobs">
+          <td>{{ job.title || 'N/A' }}</td>
+          <td>{{ job.location || 'N/A' }}</td>
+          <!-- <td>{{ job.applicationsCount || 0 }}</td> -->
+          <td>{{ job.createdAt ? (job.createdAt | date:'shortDate') : 'N/A' }}</td>
+          <td [ngClass]="{'status-active': !isJobExpired(job), 'status-expired': isJobExpired(job)}">{{ isJobExpired(job) ? 'Expiré' : (job.status || 'N/A') }}</td>
+          <td>{{ job.expiryDate ? (job.expiryDate | date:'shortDate') : 'Aucune' }}</td>
+          <td>
+  <button class="edit" (click)="editJob(job)">Éditer</button>
+  <button class="delete" (click)="deleteJob(job.id)">Supprimer</button>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+<div class="jobs-page">
+  <!-- <h1 class="page-title">Toutes les offres d'emploi</h1> -->
+
+  <!-- Barre de recherche + bouton recherche avancée -->
+<div class="search-bar">
+  <input 
+    type="text" 
+    placeholder="Rechercher une offre..." 
+    [(ngModel)]="searchTerm" 
+    (input)="filterJobs()" 
+  />
+  <button class="btn-advanced" (click)="showAdvanced = !showAdvanced">
+    Recherche avancée
+  </button>
+</div>
+
+<!-- Formulaire avancé -->
+<div class="advanced-search" *ngIf="showAdvanced">
+  <div class="field">
+    <label>Ville</label>
+    <input type="text" [(ngModel)]="advancedFilters.city" placeholder="Ville" />
+  </div>
+  <div class="field">
+    <label>Spécialité</label>
+    <input type="text" [(ngModel)]="advancedFilters.specialty" placeholder="Spécialité" />
+  </div>
+  <div class="field">
+    
+  </div>
+  <div class="field">
+    <label>Expérience (années)</label>
+    <input type="number" [(ngModel)]="advancedFilters.experience" placeholder="Ex: 2" />
+  </div>
+  <div class="field">
+    <label>Salaire minimum</label>
+    <input type="text" [(ngModel)]="advancedFilters.salary" placeholder="Ex: 3000€" />
+  </div>
+  <button class="btn-primary" (click)="applyAdvancedSearch()">Appliquer</button>
+</div>
+
+  <div *ngIf="loading" class="loading">Chargement des offres...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="jobs-grid">
+    <div *ngFor="let job of filteredJobs" class="job-card">
+      <div class="job-header">
+        <h2>{{ job.title }}</h2>
+        <span class="job-type">{{ job.type }}</span>
+      </div>
+
+      <div class="job-company">
+        <strong>Société:</strong> {{ job.recruiter?.company || 'N/A' }}
+      </div>
+
+      <div class="job-details">
+        <div><strong>Localisation:</strong> {{ job.location }}</div>
+        <div><strong>Salaire:</strong> {{ job.salary || 'Non spécifié' }}</div>
+        <div>
+          <strong>Status:</strong>
+          <span [ngClass]="{'active': job.status==='active', 'inactive': job.status==='inactive'}">
+            {{ job.status }}
+          </span>
+        </div>
+        <div *ngIf="job.expiryDate">
+          <strong>Expire le:</strong> {{ job.expiryDate | date:'shortDate' }}
+        </div>
+      </div>
+
+      <div class="job-footer">
+        <button class="btn-primary">Voir Détails</button>
+      </div>
+    </div>
+  </div>
+</div>

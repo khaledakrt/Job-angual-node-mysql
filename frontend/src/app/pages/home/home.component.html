@@ -1,0 +1,29 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <a routerLink="/">Accueil</a>
+  <a routerLink="/offres">Offres</a>
+  <a routerLink="/centre-formation">Centre de formation</a>
+  <a routerLink="/blog">Blog</a>
+  <a routerLink="/contact">Contact</a>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <h1>Bienvenue sur JobPortal</h1>
+  <p>Trouvez votre prochain emploi facilement !</p>
+  <button routerLink="/offres">Voir les offres</button>
+</section>
+
+<!-- Dernières Offres -->
+<section class="latest-jobs">
+  <h2>Dernières offres</h2>
+  <ul>
+    <li *ngFor="let job of jobs">
+      <h3>{{ job.title }}</h3>
+      <!-- <p>{{ job.company }}</p> -->
+      <p>{{ job.description | slice:0:100 }}...</p>
+      <button (click)="viewJob(job.id)">Voir détails</button>
+    </li>
+  </ul>
+</section>
+<p>D:\portal\TEST VRAIS\Job\frontend\src\app\pages\home\home.component.html</p>
