@@ -16,7 +16,8 @@ const Job = sequelize.define('Job', {
   location: { type: DataTypes.STRING },
   salary: { type: DataTypes.STRING },
   type: { type: DataTypes.ENUM('full-time','part-time','internship','contract') },
-  expiryDate: { type: DataTypes.DATE, allowNull: true } // date limite de disponibilité
+  expiryDate: { type: DataTypes.DATE, allowNull: true }, // date limite de disponibilité
+  experience: { type: DataTypes.STRING, allowNull: true }, // ✅ nouveau champ experience
 }, {
   tableName: 'jobs',
   timestamps: true,

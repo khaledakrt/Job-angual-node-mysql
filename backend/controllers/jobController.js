@@ -155,8 +155,9 @@ const getJobWithStatus = (job) => {
 // Créer une offre
 exports.createJob = async (req, res) => {
   try {
-    const { title, description, location, salary, type, expiryDate } = req.body;
-    if (!title || !description) return res.status(400).json({ message: 'Titre et description requis' });
+    const { title, description, location, salary, type, expiryDate, experience } = req.body;
+    if (!title || !description) 
+      return res.status(400).json({ message: 'Titre et description requis' });
 
     const job = await Job.create({
       recruiterId: req.user.id,
@@ -165,7 +166,8 @@ exports.createJob = async (req, res) => {
       location,
       salary,
       type,
-      expiryDate: expiryDate || null  // plus de status ici
+      expiryDate: expiryDate || null,   // plus de status ici
+      experience,
     });
 
     res.status(201).json(getJobWithStatus(job)); // status calculé à la volée
@@ -174,6 +176,7 @@ exports.createJob = async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
 
 
 // 1️⃣ Toutes les offres publiques
