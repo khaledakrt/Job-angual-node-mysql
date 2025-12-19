@@ -67,8 +67,28 @@
       </div>
 
       <div class="job-footer">
-        <button class="btn-primary">Voir Détails</button>
+          <button class="btn-primary" (click)="openJobModal(job)">Voir Détails</button>
+
       </div>
     </div>
   </div>
+  <!-- MODAL DÉTAILS JOB -->
+<div *ngIf="selectedJob" class="modal-overlay">
+  <div class="modal">
+    <h2>Détails de l'offre</h2>
+    
+    <div><strong>Titre:</strong> {{ selectedJob.title }}</div>
+    <div><strong>Description:</strong> {{ selectedJob.description }}</div>
+    <div><strong>Entreprise:</strong> {{ selectedJob.recruiter?.company || 'N/A' }}</div>
+    <div><strong>Localisation:</strong> {{ selectedJob.location }}</div>
+    <div><strong>Salaire:</strong> {{ selectedJob.salary || 'Non spécifié' }}</div>
+    <div><strong>Type:</strong> {{ selectedJob.type }}</div>
+    <div><strong>Expérience:</strong> {{ selectedJob.experience || 'Non spécifié' }} ans</div>
+    <div *ngIf="selectedJob.expiryDate"><strong>Expire le:</strong> {{ selectedJob.expiryDate | date:'shortDate' }}</div>
+
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn-primary" (click)="closeJobModal()">Fermer</button>
+    </div>
+  </div>
+</div>
 </div>

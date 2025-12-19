@@ -23,7 +23,7 @@ const Job = sequelize.define('Job', {
 });
 
 // ✅ Relation correcte
-Job.belongsTo(Recruiter, { foreignKey: 'recruiterId', targetKey: 'id', as: 'recruiter' });
+Job.belongsTo(Recruiter, { foreignKey: 'recruiterId', targetKey: 'userId', as: 'recruiter' });
 Recruiter.hasMany(Job, { foreignKey: 'recruiterId', as: 'jobs' });
 
 module.exports = Job;

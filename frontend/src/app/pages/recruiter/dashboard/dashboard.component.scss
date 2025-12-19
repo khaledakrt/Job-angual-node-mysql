@@ -159,6 +159,35 @@
 .dashboard-table button.delete:hover {
   background-color: #991b1b; /* rouge foncé au hover */
 }
+/* Boutons du modal */
+.modal .form-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Bouton Sauvegarder / Créer */
+.modal .form-actions button.btn-primary {
+  background-color: #2563eb; /* bleu */
+  color: white;
+}
+
+.modal .form-actions button.btn-primary:hover {
+  background-color: #1e40af; /* bleu foncé au hover */
+}
+
+/* Bouton Annuler */
+.modal .form-actions button.link.danger {
+  background-color: #dc2626; /* rouge */
+  color: white;
+}
+
+.modal .form-actions button.link.danger:hover {
+  background-color: #991b1b; /* rouge foncé au hover */
+}
 
 .badge { background-color: #eef2ff; color: #4338ca; padding: 4px 8px; border-radius: 999px; font-size: 0.8rem; }
 .link { background: none; border: none; color: #2563eb; cursor: pointer; margin-right: 8px; }
