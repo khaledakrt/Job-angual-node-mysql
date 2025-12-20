@@ -25,7 +25,29 @@ export class RecruiterProfileComponent implements OnInit, OnDestroy {
   editPersonal = false;
   editCompany = false;
   constructor(private authService: AuthService, private http: HttpClient) {}
+avatarUrl: string = 'assets/default-avatar.png';
 
+  loadProfile() {
+  this.loading = true;
+  const headers = this.authService.getAuthHeaders()?.headers;
+
+  this.http.get<any>('http://localhost:5000/api/recruiter/profile', { headers })
+    .subscribe({
+      next: (data) => {
+        this.profile = data;
+        // ⚡ Mettre à jour l'URL ici avec cache-busting
+        this.avatarUrl = this.profile.avatar 
+          ? `http://localhost:5000/${this.profile.avatar}?t=${new Date().getTime()}` 
+          : 'assets/default-avatar.png';
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur récupération profil backend', err);
+        this.error = 'Impossible de charger le profil';
+        this.loading = false;
+      }
+    });
+}
   ngOnInit() {
     // 1️⃣ Infos de base depuis AuthService
     this.sub = this.authService.currentUser$.subscribe({

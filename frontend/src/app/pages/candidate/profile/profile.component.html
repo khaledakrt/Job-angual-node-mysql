@@ -1,2 +1,140 @@
-<p>profile works!</p>
-<p>D:\portal\TEST VRAIS\Job\frontend\src\app\pages\candidate\profile\profile.component.html</p>
+<div class="profile-container" *ngIf="!loading && profile; else loadingTemplate">
+
+  <!-- PHOTO DE PROFIL -->
+  <div class="profile-photo">
+    <img *ngIf="profile.User.profilephoto; else defaultPhoto" [src]="profile.User.profilephoto" alt="Photo de profil">
+    <ng-template #defaultPhoto>
+      <img src="assets/default-avatar.png" alt="Photo par défaut">
+    </ng-template>
+  </div>
+
+  <!-- Partie 1 : Infos personnelles -->
+  <section class="profile-section">
+    <h2>Infos personnelles</h2>
+    <div *ngIf="!editPersonalInfo; else editPersonalTemplate">
+      <div class="field">
+        <label>Nom:</label>
+        <span>{{ profile.User.name }}</span>
+      </div>
+      <div class="field">
+        <label>Email:</label>
+        <span>{{ profile.User.email }}</span>
+      </div>
+      <div class="field">
+        <label>Téléphone:</label>
+        <span>{{ profile.phone }}</span>
+      </div>
+      <div class="field">
+        <label>Adresse:</label>
+        <span>{{ profile.address }}</span>
+      </div>
+      <button class="btn-edit" (click)="editPersonalInfo = true">Modifier</button>
+    </div>
+
+    <ng-template #editPersonalTemplate>
+      <div class="field">
+        <label>Nom:</label>
+        <input [(ngModel)]="profile.User.name" />
+      </div>
+      <div class="field">
+        <label>Email:</label>
+        <input [(ngModel)]="profile.User.email" />
+      </div>
+      <div class="field">
+        <label>Téléphone:</label>
+        <input [(ngModel)]="profile.phone" />
+      </div>
+      <div class="field">
+        <label>Adresse:</label>
+        <input [(ngModel)]="profile.address" />
+      </div>
+      <button class="btn-save" (click)="saveProfile()">Sauvegarder</button>
+      <button class="btn-cancel" (click)="editPersonalInfo = false">Annuler</button>
+    </ng-template>
+  </section>
+
+  <!-- Partie 2 : Résumé -->
+  <section class="profile-section">
+    <h2>Résumé</h2>
+    <div *ngIf="!editResume; else editResumeTemplate">
+      <p>{{ profile.resume || 'Aucun résumé disponible.' }}</p>
+      <button class="btn-edit" (click)="editResume = true">Modifier</button>
+    </div>
+    <ng-template #editResumeTemplate>
+      <textarea [(ngModel)]="profile.resume"></textarea>
+      <button class="btn-save" (click)="saveProfile()">Sauvegarder</button>
+      <button class="btn-cancel" (click)="editResume = false">Annuler</button>
+    </ng-template>
+  </section>
+
+  <!-- Partie 3 : Formation -->
+  <section class="profile-section">
+    <h2>Formation</h2>
+    <div *ngIf="!editEducation; else editEducationTemplate">
+      <ul>
+        <li *ngFor="let f of profile.education">
+          {{ f.degree }} - {{ f.institution }} ({{ f.year }})
+        </li>
+      </ul>
+      <button class="btn-edit" (click)="editEducation = true">Modifier</button>
+    </div>
+    <ng-template #editEducationTemplate>
+      <textarea [(ngModel)]="educationText" placeholder="Format: diplôme - école - année"></textarea>
+      <button class="btn-save" (click)="saveEducation()">Sauvegarder</button>
+      <button class="btn-cancel" (click)="editEducation = false">Annuler</button>
+    </ng-template>
+  </section>
+
+  <!-- Partie 4 : Expérience -->
+<section class="profile-section">
+  <h2>Expérience</h2>
+  <button (click)="toggleEditExperience()">
+    {{ editExperience ? 'Annuler' : 'Modifier' }}
+  </button>
+
+  <div *ngIf="!editExperience">
+    <div *ngFor="let e of profile.experience">
+      <strong>{{ e.title }}</strong> - {{ e.company }}
+      <small>{{ e.start_date | date:'MMM yyyy' }} - 
+             {{ e.end_date ? (e.end_date | date:'MMM yyyy') : 'Présent' }}</small>
+      <p>{{ e.description }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="editExperience">
+    <div *ngFor="let e of profile.experience; let i = index">
+      <input type="text" [(ngModel)]="e.title" placeholder="Titre du poste" />
+      <input type="text" [(ngModel)]="e.company" placeholder="Entreprise" />
+      <input type="month" [(ngModel)]="e.start_date" placeholder="Date de début" />
+      <input type="month" [(ngModel)]="e.end_date" placeholder="Date de fin" />
+      <textarea [(ngModel)]="e.description" placeholder="Description"></textarea>
+      <button (click)="removeExperience(i)">Supprimer</button>
+    </div>
+    <button (click)="addExperience()">Ajouter une expérience</button>
+    <button (click)="saveExperience()">Sauvegarder</button>
+  </div>
+</section>
+
+
+
+  <!-- Partie 5 : Compétences -->
+  <section class="profile-section">
+    <h2>Compétences</h2>
+    <div *ngIf="!editSkills; else editSkillsTemplate">
+      <ul class="skills">
+        <li *ngFor="let skill of profile.skills">{{ skill }}</li>
+      </ul>
+      <button class="btn-edit" (click)="editSkills = true">Modifier</button>
+    </div>
+    <ng-template #editSkillsTemplate>
+      <textarea [(ngModel)]="skillsText" placeholder="Séparez les compétences par une virgule"></textarea>
+      <button class="btn-save" (click)="saveSkills()">Sauvegarder</button>
+      <button class="btn-cancel" (click)="editSkills = false">Annuler</button>
+    </ng-template>
+  </section>
+
+</div>
+
+<ng-template #loadingTemplate>
+  <p>Chargement du profil...</p>
+</ng-template>
