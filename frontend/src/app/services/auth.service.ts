@@ -67,14 +67,30 @@ private currentUserSubject = new BehaviorSubject<any>(null);
     return this.currentUserSubject.value;
   }
 
-  getAuthHeaders(): { headers: HttpHeaders } {
+  /* getAuthHeaders(): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${this.getToken()}`,
         'Content-Type': 'application/json'
       })
     };
+  } */
+
+
+   getAuthHeaders(noContentType: boolean = false): { headers: HttpHeaders } {
+  let headersObj: any = {
+    Authorization: `Bearer ${this.getToken()}`
+  };
+
+  if (!noContentType) {
+    headersObj['Content-Type'] = 'application/json';
   }
+
+  return { headers: new HttpHeaders(headersObj) };
+}
+
+
+
   isLoggedIn(): boolean {
   return !!this.getToken(); // ou !!this.currentUserSubject.value
 }

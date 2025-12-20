@@ -66,4 +66,18 @@ export class RecruiterService {
   listCandidates(): Observable<Candidate[]> {
     return this.http.get<Candidate[]>(`${this.apiUrl}/candidates`, this.auth.getAuthHeaders());
   }
+  uploadAvatar(file: File): Observable<{ avatar: string }> {
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  // Récupérer headers auth sans Content-Type
+  let headersObj = this.auth.getAuthHeaders()?.headers || {};
+  if ('Content-Type' in headersObj) delete headersObj['Content-Type'];
+
+  return this.http.post<{ avatar: string }>(
+    `${this.apiUrl}/profile/avatar`,
+    formData,
+    { headers: headersObj }
+  );
+}
 }

@@ -94,6 +94,9 @@ exports.listCandidates = async (req, res) => {
   }
 };
 // Récupérer le profil du recruteur
+
+
+// Récupérer le profil du recruteur
 exports.getProfile = async (req, res) => {
   try {
     const recruiter = await Recruiter.findOne({
@@ -113,7 +116,8 @@ exports.getProfile = async (req, res) => {
       website: recruiter.website || '',
       address: recruiter.address || '',
       jobsCount: recruiter.jobsCount || 0,
-      applicationsCount: recruiter.applicationsCount || 0
+      applicationsCount: recruiter.applicationsCount || 0,
+      avatar: recruiter.avatar || null  // ✅ ajouter ici
     };
 
     res.json(profileData);

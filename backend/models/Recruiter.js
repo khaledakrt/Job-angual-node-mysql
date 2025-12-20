@@ -13,8 +13,15 @@ const Recruiter = sequelize.define('Recruiter', {
   description: { 
     type: DataTypes.TEXT,  // texte long, chiffres, symboles
     allowNull: true         // peut être vide
-  }
-}, {
+  },
+  avatar: {
+  type: DataTypes.STRING,
+  allowNull: true  // Peut être vide si pas encore uploadé
+}
+  
+}, 
+
+{
   tableName: 'recruiters',
   timestamps: true
 });
