@@ -1,5 +1,6 @@
 // backend/controllers/candidateController.js
 
+const { Op } = require('sequelize');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
 const Candidate = require('../models/Candidate');
@@ -11,6 +12,7 @@ const Competence = require('../models/Competence');
 const UserCompetence = require('../models/UserCompetence');
 
 // -------------------- JOBS --------------------
+
 // Liste des jobs
 exports.listJobs = async (req, res) => {
   try {
@@ -26,7 +28,9 @@ exports.listJobs = async (req, res) => {
 exports.applyJob = async (req, res) => {
   try {
     const jobId = req.params.jobId;
-    const existing = await Application.findOne({ where: { candidateId: req.user.id, jobId } });
+    const existing = await Application.findOne({
+      where: { candidateId: req.user.id, jobId }
+    });
     if (existing) return res.status(400).json({ message: 'Vous avez déjà postulé à ce job' });
 
     const application = await Application.create({ candidateId: req.user.id, jobId, status: 'pending' });
@@ -52,67 +56,107 @@ exports.applicationHistory = async (req, res) => {
 };
 
 // -------------------- PROFILE --------------------
+
 // Obtenir le profil complet
 exports.getProfile = async (req, res) => {
   try {
     const candidate = await Candidate.findOne({
-      where: { userId: req.user.id },
+      where: { user_id: req.user.id },
       include: [
-        { model: User, attributes: ['name', 'email', 'role'] },
-        { model: Diploma },
-        { model: FormationPrive },
-        { model: Experience },
-        { model: UserCompetence, include: [{ model: Competence, attributes: ['nomCompetence'] }] }
+        {
+          model: User,
+          as: 'userProfile', // <-- alias corrigé
+          attributes: ['name', 'email', 'role', 'profile_photo'],
+          include: [
+            { model: Diploma, as: 'diplomas' },
+            { model: FormationPrive, as: 'formationsPrivees' },
+            { model: Experience, as: 'experiences' },
+            {
+              model: UserCompetence,
+              as: 'userCompetences',
+              include: [
+                { model: Competence, as: 'competenceLink', attributes: ['nom_competence'] }
+              ]
+            }
+          ]
+        }
       ]
     });
-    res.json(candidate);
+
+    if (!candidate) return res.status(404).json({ message: 'Candidate non trouvé' });
+
+    const userData = candidate.userProfile.toJSON(); // <-- alias corrigé
+
+    const profile = {
+      id: candidate.id,
+      phone: candidate.phone,
+      address: candidate.address,
+      summary: candidate.summary || '',
+      user: {
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        profile_photo: userData.profile_photo
+      },
+      diplomas: userData.diplomas || [],
+      formationsPrivees: userData.formationsPrivees || [],
+      experiences: userData.experiences || [],
+      competences: userData.userCompetences || [],
+      skills: (userData.userCompetences || []).map(uc => uc.competenceLink.nom_competence)
+    };
+
+    res.json(profile);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
 
 // Mettre à jour le profil d’un candidat
 exports.updateProfile = async (req, res) => {
   try {
     const { phone, address } = req.body;
-    const candidate = await Candidate.findOne({ where: { userId: req.user.id } });
+    const candidate = await Candidate.findOne({ where: { user_id: req.user.id }, include: { model: User, as: 'user' } });
     if (!candidate) return res.status(404).json({ message: 'Candidate non trouvé' });
 
     candidate.phone = phone || candidate.phone;
     candidate.address = address || candidate.address;
     await candidate.save();
-    res.json(candidate);
+
+    res.json({
+      id: candidate.id,
+      phone: candidate.phone,
+      address: candidate.address,
+      user: {
+        name: candidate.user.name,
+        email: candidate.user.email,
+        role: candidate.user.role,
+        profile_photo: candidate.user.profile_photo
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
+
 // -------------------- DIPLOMAS --------------------
 exports.addDiploma = async (req, res) => {
   try {
     const { level, university, year } = req.body;
-    
-    // ici, userId doit venir soit du token, soit de la session, ou du req.body
-    const userId = req.user?.id; // par exemple si tu as l'auth middleware
-
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID manquant' });
-    }
-
     const diploma = await Diploma.create({
-      userId,      // ← c'est crucial
+      user_id: req.user.id,
       level,
       university,
       year,
       type: 'scolaire'
     });
-
     res.status(201).json(diploma);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -120,7 +164,7 @@ exports.updateDiploma = async (req, res) => {
   try {
     const { id } = req.params;
     const { level, university, year, type } = req.body;
-    const diploma = await Diploma.findOne({ where: { id, userId: req.user.id } });
+    const diploma = await Diploma.findOne({ where: { id, user_id: req.user.id } });
     if (!diploma) return res.status(404).json({ message: 'Diploma non trouvé' });
 
     diploma.level = level || diploma.level;
@@ -138,7 +182,7 @@ exports.updateDiploma = async (req, res) => {
 exports.deleteDiploma = async (req, res) => {
   try {
     const { id } = req.params;
-    const diploma = await Diploma.findOne({ where: { id, userId: req.user.id } });
+    const diploma = await Diploma.findOne({ where: { id, user_id: req.user.id } });
     if (!diploma) return res.status(404).json({ message: 'Diploma non trouvé' });
     await diploma.destroy();
     res.json({ message: 'Diploma supprimé' });
@@ -153,7 +197,7 @@ exports.addFormationPrive = async (req, res) => {
   try {
     const { centerFormation, titreFormation, dateFormation } = req.body;
     const formation = await FormationPrive.create({
-      userId: req.user.id,
+      user_id: req.user.id,
       centerFormation,
       titreFormation,
       dateFormation
@@ -169,7 +213,7 @@ exports.updateFormationPrive = async (req, res) => {
   try {
     const { id } = req.params;
     const { centerFormation, titreFormation, dateFormation } = req.body;
-    const formation = await FormationPrive.findOne({ where: { id, userId: req.user.id } });
+    const formation = await FormationPrive.findOne({ where: { id, user_id: req.user.id } });
     if (!formation) return res.status(404).json({ message: 'Formation non trouvée' });
 
     formation.centerFormation = centerFormation || formation.centerFormation;
@@ -186,7 +230,7 @@ exports.updateFormationPrive = async (req, res) => {
 exports.deleteFormationPrive = async (req, res) => {
   try {
     const { id } = req.params;
-    const formation = await FormationPrive.findOne({ where: { id, userId: req.user.id } });
+    const formation = await FormationPrive.findOne({ where: { id, user_id: req.user.id } });
     if (!formation) return res.status(404).json({ message: 'Formation non trouvée' });
     await formation.destroy();
     res.json({ message: 'Formation supprimée' });
@@ -200,36 +244,26 @@ exports.deleteFormationPrive = async (req, res) => {
 exports.addExperience = async (req, res) => {
   try {
     const { title, company, startDate, endDate, description } = req.body;
-
-    // Sequelize va mapper userId → user_id et startDate → start_date automatiquement grâce à `field` dans le modèle
     const experience = await Experience.create({
-      userId: req.user.id,
+      user_id: req.user.id,
       title,
       company,
       startDate,
       endDate,
       description
     });
-
     res.status(201).json(experience);
   } catch (error) {
     console.error(error);
-
-    if (error.name === 'SequelizeValidationError') {
-      // renvoie les détails si un champ obligatoire manque
-      return res.status(400).json({ errors: error.errors.map(e => e.message) });
-    }
-
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
-
 
 exports.updateExperience = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, company, startDate, endDate, description } = req.body;
-    const experience = await Experience.findOne({ where: { id, userId: req.user.id } });
+    const experience = await Experience.findOne({ where: { id, user_id: req.user.id } });
     if (!experience) return res.status(404).json({ message: 'Experience non trouvée' });
 
     experience.title = title || experience.title;
@@ -248,7 +282,7 @@ exports.updateExperience = async (req, res) => {
 exports.deleteExperience = async (req, res) => {
   try {
     const { id } = req.params;
-    const experience = await Experience.findOne({ where: { id, userId: req.user.id } });
+    const experience = await Experience.findOne({ where: { id, user_id: req.user.id } });
     if (!experience) return res.status(404).json({ message: 'Experience non trouvée' });
     await experience.destroy();
     res.json({ message: 'Experience supprimée' });
@@ -262,11 +296,18 @@ exports.deleteExperience = async (req, res) => {
 exports.addUserCompetence = async (req, res) => {
   try {
     const { competenceId, niveau } = req.body;
+    const competence = await Competence.findByPk(competenceId);
+    if (!competence) return res.status(404).json({ message: 'Compétence introuvable' });
+
+    const existing = await UserCompetence.findOne({ where: { user_id: req.user.id, competenceId } });
+    if (existing) return res.status(400).json({ message: 'Compétence déjà ajoutée' });
+
     const userCompetence = await UserCompetence.create({
-      userId: req.user.id,
+      user_id: req.user.id,
       competenceId,
       niveau
     });
+
     res.status(201).json(userCompetence);
   } catch (error) {
     console.error(error);
@@ -277,14 +318,13 @@ exports.addUserCompetence = async (req, res) => {
 exports.updateUserCompetence = async (req, res) => {
   try {
     const { id } = req.params;
-    const { competenceId, niveau } = req.body;
-    const userCompetence = await UserCompetence.findOne({ where: { id, userId: req.user.id } });
+    const { niveau } = req.body;
+    const userCompetence = await UserCompetence.findOne({ where: { id, user_id: req.user.id } });
     if (!userCompetence) return res.status(404).json({ message: 'Compétence non trouvée' });
 
-    userCompetence.competenceId = competenceId || userCompetence.competenceId;
     userCompetence.niveau = niveau || userCompetence.niveau;
     await userCompetence.save();
-    res.json(userCompetence);
+    res.json({ message: 'Compétence modifiée', userCompetence });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });
@@ -294,10 +334,76 @@ exports.updateUserCompetence = async (req, res) => {
 exports.deleteUserCompetence = async (req, res) => {
   try {
     const { id } = req.params;
-    const userCompetence = await UserCompetence.findOne({ where: { id, userId: req.user.id } });
+    const userCompetence = await UserCompetence.findOne({ where: { id, user_id: req.user.id } });
     if (!userCompetence) return res.status(404).json({ message: 'Compétence non trouvée' });
+
     await userCompetence.destroy();
     res.json({ message: 'Compétence supprimée' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+exports.searchCompetences = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ message: 'Query manquante' });
+
+    const competences = await Competence.findAll({
+      where: { nomCompetence: { [Op.like]: `${query}%` } },
+      limit: 10,
+      order: [['nomCompetence', 'ASC']]
+    });
+
+    res.json(competences);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// -------------------- SUMMARY --------------------
+exports.addSummary = async (req, res) => {
+  try {
+    const { summary } = req.body;
+    const candidate = await Candidate.findOne({ where: { user_id: req.user.id } });
+    if (!candidate) return res.status(404).json({ message: 'Candidate non trouvé' });
+
+    if (candidate.summary) return res.status(400).json({ message: 'Résumé déjà existant. Utilisez la modification.' });
+
+    candidate.summary = summary;
+    await candidate.save();
+    res.status(201).json({ message: 'Résumé ajouté', summary });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+exports.updateSummary = async (req, res) => {
+  try {
+    const { summary } = req.body;
+    const candidate = await Candidate.findOne({ where: { user_id: req.user.id } });
+    if (!candidate) return res.status(404).json({ message: 'Candidate non trouvé' });
+
+    candidate.summary = summary;
+    await candidate.save();
+    res.json({ message: 'Résumé modifié', summary });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+exports.deleteSummary = async (req, res) => {
+  try {
+    const candidate = await Candidate.findOne({ where: { user_id: req.user.id } });
+    if (!candidate) return res.status(404).json({ message: 'Candidate non trouvé' });
+
+    candidate.summary = null;
+    await candidate.save();
+    res.json({ message: 'Résumé supprimé' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });

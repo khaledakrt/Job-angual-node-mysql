@@ -35,4 +35,9 @@ router.post('/competences', authMiddleware, roleMiddleware('candidate'), candida
 router.put('/competences/:id', authMiddleware, roleMiddleware('candidate'), candidateController.updateUserCompetence);
 router.delete('/competences/:id', authMiddleware, roleMiddleware('candidate'), candidateController.deleteUserCompetence);
 
+// Routes résumé
+router.post('/summary', authMiddleware, candidateController.addSummary);
+router.put('/summary', authMiddleware, candidateController.updateSummary);
+router.delete('/summary', authMiddleware, candidateController.deleteSummary);
+
 module.exports = router;

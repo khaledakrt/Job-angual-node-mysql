@@ -31,14 +31,28 @@ export interface Candidate {
   userId: number;
   phone: string;
   address: string;
+  summary?: string; // correspond au "resume" ou "summary" du backend
   User: {
     name: string;
     email: string;
     role: string;
     profilephoto?: string;
   };
-  resume?: string;
-  education?: { degree: string; institution: string; year: string }[];
+  diplomas?: {
+    id: number;
+    user_id: number;
+    level: string;
+    university: string;
+    year: string;
+    type?: string;
+  }[];
+  formationsPrivees?: {
+    id: number;
+    user_Id: number;
+    center_formation: string;
+    titre_formation: string;
+    date_formation: string;
+  }[];
   experience?: {
     id: number;
     Usr_id: number;
@@ -48,8 +62,19 @@ export interface Candidate {
     end_date: string;
     description: string;
   }[];
+  competences?: {
+    id: number;
+    user_id: number;
+    competence_id: number;
+    niveau?: string;
+    nomCompetence?: string;
+  }[];
+  // Pour le frontend
+  education?: { degree: string; institution: string; year: string }[];
   skills?: string[];
 }
+
+
 
 
 

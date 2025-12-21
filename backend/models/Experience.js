@@ -24,7 +24,7 @@ module.exports = Experience;
  */
 
 // backend/models/Experience.js
-const { DataTypes } = require('sequelize');
+/* const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const User = require('./User');
 
@@ -44,4 +44,30 @@ const Experience = sequelize.define('Experience', {
 // Association
 Experience.belongsTo(User, { foreignKey: 'userId' });
 
+module.exports = Experience; */
+
+
+
+// backend/models/Experience.js
+// Exemple pour Experience.js
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/db');
+const User = require('./User');
+
+class Experience extends Model {}
+
+Experience.init({
+  user_id: { type: DataTypes.INTEGER, allowNull: false },
+  title: { type: DataTypes.STRING(255), allowNull: false },
+  company: { type: DataTypes.STRING(255) },
+  startDate: { type: DataTypes.DATEONLY, field: 'start_date' },
+  endDate: { type: DataTypes.DATEONLY, field: 'end_date' },
+  description: { type: DataTypes.TEXT },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { sequelize, modelName: 'Experience', tableName: 'experiences' });
+
+Experience.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = Experience;
+

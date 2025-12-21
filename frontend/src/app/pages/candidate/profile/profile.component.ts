@@ -1,8 +1,9 @@
+// frontend/src/app/pages/candidate/profile/profile.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Candidate } from '../../../models/candidate.model';
 import { CandidateService } from '../../../services/candidate.service';
+import { Candidate } from '../../../models/candidate.model';
 
 @Component({
   selector: 'app-profile',
@@ -12,18 +13,30 @@ import { CandidateService } from '../../../services/candidate.service';
   styleUrls: ['./profile.component.scss'],
 })
 export class CandidateProfileComponent implements OnInit {
-  profile!: Candidate;
+  profile: Candidate = {
+    id: 0,
+    userId: 0,
+    phone: '',
+    address: '',
+    summary: '',
+    User: { name: '', email: '', role: '', profilephoto: '' },
+    diplomas: [],
+    formationsPrivees: [],
+    experience: [],
+    competences: [],
+    education: [],
+    skills: []
+  };
+
   loading = true;
   error = '';
 
-  // Flags pour l'édition de chaque section
   editPersonalInfo = false;
   editResume = false;
   editEducation = false;
   editExperience = false;
   editSkills = false;
 
-  // Champs temporaires pour textarea
   educationText = '';
   skillsText = '';
 
@@ -34,28 +47,58 @@ export class CandidateProfileComponent implements OnInit {
   }
 
   loadProfile(): void {
-    this.candidateService.getProfile().subscribe(
-      (data: Candidate) => {
-        this.profile = data;
-        this.loading = false;
+    this.candidateService.getProfile().subscribe({
+      next: (data: any) => {
+        this.profile = {
+          id: data.id,
+          userId: data.user?.id || 0,
+          phone: data.phone || '',
+          address: data.address || '',
+          summary: data.summary || '',
+          User: {
+            name: data.user?.name || '',
+            email: data.user?.email || '',
+            role: data.user?.role || '',
+            profilephoto: data.user?.profile_photo || ''
+          },
+          diplomas: data.diplomas || [],
+          formationsPrivees: data.formationsPrivees || [],
+          experience: (data.experiences || []).map((exp: any) => ({
+            id: exp.id || 0,
+            Usr_id: exp.user_id || 0,
+            title: exp.title || '',
+            company: exp.company || '',
+            start_date: exp.startDate || '', // ← correspondance avec le backend si nécessaire
+            end_date: exp.endDate || '',
+            description: exp.description || ''
+          })),
+          competences: data.competences || [],
+          education: data.diplomas?.map((d: any) => ({
+            degree: d.level,
+            institution: d.university,
+            year: d.year
+          })) || [],
+          skills: data.skills || []
+        };
 
-        // Initialiser les textes pour les sections éditables
-        this.educationText = this.profile.education
-          ?.map(e => `${e.degree} - ${e.institution} - ${e.year}`)
-          .join('\n') || '';
-        this.skillsText = this.profile.skills?.join(', ') || '';
-      },
-      (err: any) => {
-        this.error = 'Impossible de charger le profil.';
+        this.educationText = (this.profile.education || [])
+          .map(e => `${e.degree} - ${e.institution} - ${e.year}`)
+          .join('\n');
+
+        this.skillsText = (this.profile.skills || []).join(', ');
         this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Impossible de charger le profil.';
         console.error(err);
+        this.loading = false;
       }
-    );
+    });
   }
 
   saveProfile(): void {
-    this.candidateService.updateProfile(this.profile).subscribe(
-      (data: Candidate) => {
+    this.candidateService.updateProfile(this.profile).subscribe({
+      next: (data: Candidate) => {
         this.profile = data;
         this.editPersonalInfo = false;
         this.editResume = false;
@@ -63,11 +106,11 @@ export class CandidateProfileComponent implements OnInit {
         this.editExperience = false;
         this.editSkills = false;
       },
-      (err: any) => {
+      error: (err) => {
         this.error = 'Impossible de sauvegarder le profil.';
         console.error(err);
       }
-    );
+    });
   }
 
   saveEducation(): void {
@@ -79,15 +122,12 @@ export class CandidateProfileComponent implements OnInit {
     this.saveProfile();
   }
 
-  // ------------------------
-  // Expériences
-  // ------------------------
   toggleEditExperience(): void {
     this.editExperience = !this.editExperience;
   }
 
-  addExperience(): void {
-    if (!this.profile.experience) this.profile.experience = [];
+    addExperience(): void {
+    this.profile.experience = this.profile.experience || [];
     this.profile.experience.push({
       id: 0,
       Usr_id: this.profile.userId,
@@ -107,7 +147,6 @@ export class CandidateProfileComponent implements OnInit {
   saveExperience(): void {
     if (!this.profile.experience) return;
 
-    // Nettoyer les champs vides
     this.profile.experience = this.profile.experience.map(exp => ({
       id: exp.id || 0,
       Usr_id: this.profile.userId,
@@ -124,7 +163,7 @@ export class CandidateProfileComponent implements OnInit {
 
   cancelEditExperience(): void {
     this.editExperience = false;
-    this.loadProfile(); // Recharger pour annuler les modifications
+    this.loadProfile();
   }
 
   saveSkills(): void {

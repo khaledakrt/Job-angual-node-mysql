@@ -42,8 +42,12 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
+require('./models/associations');
 
 const { connectDB } = require('./config/db');
+// ⚡ Importation de toutes les associations (doit venir avant toute utilisation des modèles)
+const { Candidate, Job, Application, Diploma, FormationPrive, Experience, UserCompetence } = require('./models/associations');
+const User = require('./models/User'); // si besoin
 
 const authRoutes = require('./routes/authRoutes');
 const candidateRoutes = require('./routes/candidateRoutes');
